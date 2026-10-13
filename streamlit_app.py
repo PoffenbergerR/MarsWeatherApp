@@ -25,7 +25,7 @@ most_recent_date = df.index[0]
 min_date = df.index[-1]
 
 def fill_data(chosen=most_recent_date):
-    variables = ["Min Temperature", "Sunrise", "Max Temperature", "Sunset", 
+    var = ["Min Temperature", "Sunrise", "Max Temperature", "Sunset", 
              "Min Ground Temperature", "UV Irradiance Index", "Max Ground Temperature",
              "Atmosphere Opacity", "Pressure"]
 
@@ -33,7 +33,7 @@ def fill_data(chosen=most_recent_date):
     #This is for when the requested day does not exist
     if chosen not in df.index:
         track = 0
-        for v in variables:
+        for v in var:
             if track%2 == 0:
                 left2.container(border=True).write(f"{v}: -- ")
             else:
@@ -41,13 +41,86 @@ def fill_data(chosen=most_recent_date):
             track += 1
 
     else:
-        track = 0
-        for v in variables:
-            if track%2 == 0:
-                left2.container(border=True).write(f"{v}: {df.at[chosen, v]}")
+        if st.session_state.temp_unit == "Celsius":
+            left2.container(border=True).write(f"{var[0]}: {df.at[chosen, var[0]]}°C")
+            right2.container(border=True).write(f"{var[1]}: {df.at[chosen, var[1]]}")
+            left2.container(border=True).write(f"{var[2]}: {df.at[chosen, var[2]]}°C")
+            right2.container(border=True).write(f"{var[3]}: {df.at[chosen, var[3]]}")
+            left2.container(border=True).write(f"{var[4]}: {df.at[chosen, var[4]]}°C")
+            right2.container(border=True).write(f"{var[5]}: {df.at[chosen, var[5]]}")
+            left2.container(border=True).write(f"{var[6]}: {df.at[chosen, var[6]]}°C")
+            right2.container(border=True).write(f"{var[7]}: {df.at[chosen, var[7]]}")
+            #for the pressure
+            if df.at[chosen, var[8]] == "--":
+                left2.container(border=True).write(f"{var[8]}: --")
+            elif st.session_state.pressure_unit == "Pascal (Pa)":
+                left2.container(border=True).write(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
+            elif  st.session_state.pressure_unit == "Millibar (mbar)":
+                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
+            elif st.session_state.pressure_unit == "Standard atmosphere (atm)":
+                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
+
+        elif st.session_state.temp_unit == "Fahrenheit":
+            if df.at[chosen, var[0]] != "--":
+                left2.container(border=True).write(f"{var[0]}: {round(int(df.at[chosen, var[0]]) * 1.8 + 32)}°F")
             else:
-                right2.container(border=True).write(f"{v}: {df.at[chosen, v]}")
-            track += 1
+                left2.container(border=True).write(f"{var[0]}: --°F")
+            right2.container(border=True).write(f"{var[1]}: {df.at[chosen, var[1]]}")
+            if df.at[chosen, var[2]] != "--":
+                left2.container(border=True).write(f"{var[2]}: {round(int(df.at[chosen, var[2]]) * 1.8 + 32)}°F")
+            else:
+                left2.container(border=True).write(f"{var[2]}: --°F")
+            right2.container(border=True).write(f"{var[3]}: {df.at[chosen, var[3]]}")
+            if df.at[chosen, var[4]] != "--":
+                left2.container(border=True).write(f"{var[4]}: {round(int(df.at[chosen, var[4]]) * 1.8 + 32)}°F")
+            else:
+                left2.container(border=True).write(f"{var[4]}: --°F")
+            right2.container(border=True).write(f"{var[5]}: {df.at[chosen, var[5]]}")
+            if df.at[chosen, var[6]] != "--":
+                left2.container(border=True).write(f"{var[6]}: {round(int(df.at[chosen, var[6]]) * 1.8 + 32)}°F")
+            else:
+                left2.container(border=True).write(f"{var[6]}: --°F")
+            right2.container(border=True).write(f"{var[7]}: {df.at[chosen, var[7]]}")
+            #for the pressure
+            if df.at[chosen, var[8]] == "--":
+                left2.container(border=True).write(f"{var[8]}: --")
+            elif st.session_state.pressure_unit == "Pascal (Pa)":
+                left2.container(border=True).write(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
+            elif  st.session_state.pressure_unit == "Millibar (mbar)":
+                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
+            elif st.session_state.pressure_unit == "Standard atmosphere (atm)":
+                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
+
+        elif st.session_state.temp_unit == "Kelvin":
+            if df.at[chosen, var[0]] != "--":
+                left2.container(border=True).write(f"{var[0]}: {round(int(df.at[chosen, var[0]]) + 273.15)}°K")
+            else:
+                left2.container(border=True).write(f"{var[0]}: --°K")
+            right2.container(border=True).write(f"{var[1]}: {df.at[chosen, var[1]]}")
+            if df.at[chosen, var[2]] != "--":
+                left2.container(border=True).write(f"{var[2]}: {round(int(df.at[chosen, var[2]]) + 273.15)}°K")
+            else:
+                left2.container(border=True).write(f"{var[2]}: --°K")
+            right2.container(border=True).write(f"{var[3]}: {df.at[chosen, var[3]]}")
+            if df.at[chosen, var[4]] != "--":
+                left2.container(border=True).write(f"{var[4]}: {round(int(df.at[chosen, var[4]]) + 273.15)}°K")
+            else:
+                left2.container(border=True).write(f"{var[4]}: --°K")
+            right2.container(border=True).write(f"{var[5]}: {df.at[chosen, var[5]]}")
+            if df.at[chosen, var[6]] != "--":
+                left2.container(border=True).write(f"{var[6]}: {round(int(df.at[chosen, var[6]]) + 273.15)}°K")
+            else:
+                left2.container(border=True).write(f"{var[6]}: --°K")
+            right2.container(border=True).write(f"{var[7]}: {df.at[chosen, var[7]]}")
+            #for the pressure
+            if df.at[chosen, var[8]] == "--":
+                left2.container(border=True).write(f"{var[8]}: --")
+            elif st.session_state.pressure_unit == "Pascal (Pa)":
+                left2.container(border=True).write(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
+            elif  st.session_state.pressure_unit == "Millibar (mbar)":
+                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
+            elif st.session_state.pressure_unit == "Standard atmosphere (atm)":
+                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
 
 def change_date():
     chosen_date = st.session_state.my_date_picker
@@ -76,6 +149,12 @@ middle.date_input(
 if "my_date_picker" not in st.session_state:
     st.session_state.my_date_picker = date.fromisoformat(most_recent_date)
 
+if "temp_unit" not in st.session_state:
+    st.session_state.temp_unit = "Celsius"
+
+if "pressure_unit" not in st.session_state:
+    st.session_state.pressure_unit = "Pascal (Pa)"
+
 sol = middle.empty()
 ls = middle.empty()
 weather_data = st.empty()
@@ -102,3 +181,22 @@ with weather_data.container():
     chosen_date = st.session_state.my_date_picker
     date_str = chosen_date.strftime("%Y-%m-%d")
     fill_data(date_str)
+
+
+#Sidebar features
+with st.sidebar:
+    st.radio(
+        "Temperature Unit of Measurement",
+        ("Celsius", "Fahrenheit", "Kelvin"),
+        on_change=change_date,
+        key = "temp_unit"
+    )
+
+#do I want to do this?"Pa", "mbar", "atm"
+with st.sidebar:
+    st.radio(
+        "Pressure Unit of Measurement",
+        ("Pascal (Pa)", "Millibar (mbar)", "Standard atmosphere (atm)"),
+        on_change=change_date,
+        key = "pressure_unit"
+    )
