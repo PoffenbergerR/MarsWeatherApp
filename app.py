@@ -129,7 +129,7 @@ with open("data/MarsWeatherData.json", "r") as file:
 # m.markdown("""# :orange[Mars Weather Forecast]""")
 st.markdown("<h1 style='text-align: center; color: #921f02;'>Mars Weather Forecast</h1>", unsafe_allow_html=True)
 
-image_path = Path(__file__).resolve().parent / "images" / "mars.jpg"
+image_path = Path(__file__).resolve().parent / "images" / "mars.png"
 
 left, center, right= st.columns([1, 2, 1])
 
