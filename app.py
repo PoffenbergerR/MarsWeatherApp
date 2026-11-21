@@ -15,8 +15,12 @@ df.rename(columns={"min_temp": "Min Temperature", "max_temp": "Max Temperature",
                    "max_gts_temp": "Max Ground Temperature",
                    "sunrise": "Sunrise", "sunset": "Sunset"}, inplace=True)
 
+lstmdf = pd.read_csv("data/lstm_predictions.csv")
+lstmdf = lstmdf.set_index("terrestrial_date")
+
 most_recent_date = df.index[0]
 min_date = df.index[-1]
+day_ahead = lstmdf.index[-1]
 
 def fill_data(chosen=most_recent_date):
     var = ["Min Temperature", "Sunrise", "Max Temperature", "Sunset", 
@@ -147,7 +151,7 @@ middle.date_input(
     "Terrestrial Date", 
     value=date.fromisoformat(most_recent_date), 
     min_value=date.fromisoformat(min_date),
-    max_value=date.fromisoformat(most_recent_date),
+    max_value=date.fromisoformat(day_ahead),
     on_change=change_date,
     key="my_date_picker",
 )
@@ -160,6 +164,9 @@ if "temp_unit" not in st.session_state:
 
 if "pressure_unit" not in st.session_state:
     st.session_state.pressure_unit = "Pascal (Pa)"
+
+# if "ml_models" not in st.session_state:
+#     st.session_state.ml_models = "LSTM"
 
 sol = middle.empty()
 ls = middle.empty()
@@ -191,41 +198,73 @@ with weather_data.container():
     
 st.divider()
 with st.container():
-    st.subheader('Machine Model Temperature Predictions')
-    
-    pred_left, pred_right = st.columns(2)
-    
-    with pred_left:
-        st.metric(
-                     label="Predicted Min Temperature",
-                     value="-- C"
-                )
-        st.metric(
-                     label="Predicted Max Temperature",
-                     value="-- C"
-                )
-        st.metric(
-                     label="Predicted Min Ground Temperature",
-                     value="-- C"
-                )
-        st.metric(
-                     label="Predicted Max Ground Temperature",
-                     value="-- C"
-                )
+    chosen_date = st.session_state.my_date_picker
+    chosen = chosen_date.strftime("%Y-%m-%d")
 
-        
-    with pred_right:
-        st.metric(
-                     label="Predicted Atomospheric Pressure",
-                     value="-- PA"
-                )
-        st.metric(
-                     label="Predicted UV Index",
-                     value="--"
-                )
-        
-        st.metric("Prediction Error", "-- C")
+    st.subheader('Machine Learning Model Predictions')
+    pred_left, pred_right = st.columns(2)
+    if chosen not in lstmdf.index:
+        with pred_left:
+            st.metric(
+                        label="Predicted Min Temperature",
+                        value="--"
+                    )
+            st.metric(
+                        label="Predicted Max Temperature",
+                        value="--"
+                    )
+            st.metric(
+                        label="Predicted Min Ground Temperature",
+                        value="--"
+                    )
+            st.metric(
+                        label="Predicted Max Ground Temperature",
+                        value="--"
+                    )
+
             
+        with pred_right:
+            st.metric(
+                        label="Predicted Atomospheric Pressure",
+                        value="--"
+                    )
+            st.metric(
+                        label="Predicted UV Index",
+                        value="--"
+                    )
+            
+            st.metric("Prediction Error", "--")
+    else:
+        with pred_left:
+            st.metric(
+                            label="Predicted Min Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'min_temp']))} C"
+                    )
+            st.metric(
+                            label="Predicted Max Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'max_temp']))} C"
+                    )
+            st.metric(
+                            label="Predicted Min Ground Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'min_gts_temp']))} C"
+                    )
+            st.metric(
+                            label="Predicted Max Ground Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'max_gts_temp']))} C"
+                    )
+
+            
+        with pred_right:
+            st.metric(
+                            label="Predicted Atomospheric Pressure",
+                            value=f"{round(int(lstmdf.at[chosen, 'pressure']))} PA"
+                    )
+            st.metric(
+                            label="Predicted UV Index",
+                            value=f"{lstmdf.at[chosen, 'local_uv_irradiance_index']}"
+                    )
+            
+            st.metric("Prediction Error", "--")
         
 
 
@@ -238,7 +277,6 @@ with st.sidebar:
         key = "temp_unit"
     )
 
-#do I want to do this?"Pa", "mbar", "atm"
 with st.sidebar:
     st.radio(
         "Pressure Unit of Measurement",
@@ -246,3 +284,11 @@ with st.sidebar:
         on_change=change_date,
         key = "pressure_unit"
     )
+
+# with st.sidebar:
+#     st.radio(
+#         "Machine Learning Models",
+#         ("LSTM", "Random Forest", "XGBoost"),
+#         on_change=change_date,
+#         key = "ml_models"
+#     )
