@@ -13,7 +13,7 @@ df.rename(columns={"min_temp": "Min Temperature", "max_temp": "Max Temperature",
                    "local_uv_irradiance_index": "UV Irradiance Index",
                    "min_gts_temp": "Min Ground Temperature",
                    "max_gts_temp": "Max Ground Temperature",
-                   "sunrise": "Sunrise", "sunset": "Sunset"}, inplace=True)
+                   "sunrise": "Sunrise", "sunset": "Sunset", "season": "Season"}, inplace=True)
 
 lstmdf = pd.read_csv("data/lstm_predictions.csv")
 lstmdf = lstmdf.set_index("terrestrial_date")
@@ -25,7 +25,7 @@ day_ahead = lstmdf.index[-1]
 def fill_data(chosen=most_recent_date):
     var = ["Min Temperature", "Sunrise", "Max Temperature", "Sunset", 
              "Min Ground Temperature", "UV Irradiance Index", "Max Ground Temperature",
-             "Atmosphere Opacity", "Pressure"]
+             "Atmosphere Opacity", "Pressure", "Season"]
 
     left2, right2 = weather_data.columns(2)
     #This is for when the requested day does not exist
@@ -41,84 +41,62 @@ def fill_data(chosen=most_recent_date):
     else:
         if st.session_state.temp_unit == "Celsius":
             left2.container(border=True).write(f"{var[0]}: {df.at[chosen, var[0]]}°C")
-            right2.container(border=True).write(f"{var[1]}: {df.at[chosen, var[1]]}")
             left2.container(border=True).write(f"{var[2]}: {df.at[chosen, var[2]]}°C")
-            right2.container(border=True).write(f"{var[3]}: {df.at[chosen, var[3]]}")
             left2.container(border=True).write(f"{var[4]}: {df.at[chosen, var[4]]}°C")
-            right2.container(border=True).write(f"{var[5]}: {df.at[chosen, var[5]]}")
             left2.container(border=True).write(f"{var[6]}: {df.at[chosen, var[6]]}°C")
-            right2.container(border=True).write(f"{var[7]}: {df.at[chosen, var[7]]}")
-            #for the pressure
-            if df.at[chosen, var[8]] == "--":
-                left2.container(border=True).write(f"{var[8]}: --")
-            elif st.session_state.pressure_unit == "Pascal (Pa)":
-                left2.container(border=True).write(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
-            elif  st.session_state.pressure_unit == "Millibar (mbar)":
-                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
-            elif st.session_state.pressure_unit == "Standard atmosphere (atm)":
-                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
 
         elif st.session_state.temp_unit == "Fahrenheit":
             if df.at[chosen, var[0]] != "--":
                 left2.container(border=True).write(f"{var[0]}: {round(int(df.at[chosen, var[0]]) * 1.8 + 32)}°F")
             else:
                 left2.container(border=True).write(f"{var[0]}: --°F")
-            right2.container(border=True).write(f"{var[1]}: {df.at[chosen, var[1]]}")
             if df.at[chosen, var[2]] != "--":
                 left2.container(border=True).write(f"{var[2]}: {round(int(df.at[chosen, var[2]]) * 1.8 + 32)}°F")
             else:
                 left2.container(border=True).write(f"{var[2]}: --°F")
-            right2.container(border=True).write(f"{var[3]}: {df.at[chosen, var[3]]}")
             if df.at[chosen, var[4]] != "--":
                 left2.container(border=True).write(f"{var[4]}: {round(int(df.at[chosen, var[4]]) * 1.8 + 32)}°F")
             else:
                 left2.container(border=True).write(f"{var[4]}: --°F")
-            right2.container(border=True).write(f"{var[5]}: {df.at[chosen, var[5]]}")
             if df.at[chosen, var[6]] != "--":
                 left2.container(border=True).write(f"{var[6]}: {round(int(df.at[chosen, var[6]]) * 1.8 + 32)}°F")
             else:
                 left2.container(border=True).write(f"{var[6]}: --°F")
-            right2.container(border=True).write(f"{var[7]}: {df.at[chosen, var[7]]}")
-            #for the pressure
-            if df.at[chosen, var[8]] == "--":
-                left2.container(border=True).write(f"{var[8]}: --")
-            elif st.session_state.pressure_unit == "Pascal (Pa)":
-                left2.container(border=True).write(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
-            elif  st.session_state.pressure_unit == "Millibar (mbar)":
-                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
-            elif st.session_state.pressure_unit == "Standard atmosphere (atm)":
-                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
 
         elif st.session_state.temp_unit == "Kelvin":
             if df.at[chosen, var[0]] != "--":
                 left2.container(border=True).write(f"{var[0]}: {round(int(df.at[chosen, var[0]]) + 273.15)}°K")
             else:
                 left2.container(border=True).write(f"{var[0]}: --°K")
-            right2.container(border=True).write(f"{var[1]}: {df.at[chosen, var[1]]}")
             if df.at[chosen, var[2]] != "--":
                 left2.container(border=True).write(f"{var[2]}: {round(int(df.at[chosen, var[2]]) + 273.15)}°K")
             else:
                 left2.container(border=True).write(f"{var[2]}: --°K")
-            right2.container(border=True).write(f"{var[3]}: {df.at[chosen, var[3]]}")
             if df.at[chosen, var[4]] != "--":
                 left2.container(border=True).write(f"{var[4]}: {round(int(df.at[chosen, var[4]]) + 273.15)}°K")
             else:
                 left2.container(border=True).write(f"{var[4]}: --°K")
-            right2.container(border=True).write(f"{var[5]}: {df.at[chosen, var[5]]}")
             if df.at[chosen, var[6]] != "--":
                 left2.container(border=True).write(f"{var[6]}: {round(int(df.at[chosen, var[6]]) + 273.15)}°K")
             else:
                 left2.container(border=True).write(f"{var[6]}: --°K")
-            right2.container(border=True).write(f"{var[7]}: {df.at[chosen, var[7]]}")
-            #for the pressure
-            if df.at[chosen, var[8]] == "--":
-                left2.container(border=True).write(f"{var[8]}: --")
-            elif st.session_state.pressure_unit == "Pascal (Pa)":
-                left2.container(border=True).write(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
-            elif  st.session_state.pressure_unit == "Millibar (mbar)":
-                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
-            elif st.session_state.pressure_unit == "Standard atmosphere (atm)":
-                left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
+        
+        #for the pressure
+        if df.at[chosen, var[8]] == "--":
+            left2.container(border=True).write(f"{var[8]}: --")
+        elif st.session_state.pressure_unit == "Pascal (Pa)":
+            left2.container(border=True).write(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
+        elif  st.session_state.pressure_unit == "Millibar (mbar)":
+            left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
+        elif st.session_state.pressure_unit == "Standard atmosphere (atm)":
+            left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
+
+        #data with no unit of measurement options
+        right2.container(border=True).write(f"{var[1]}: {df.at[chosen, var[1]]}")
+        right2.container(border=True).write(f"{var[3]}: {df.at[chosen, var[3]]}")
+        right2.container(border=True).write(f"{var[5]}: {df.at[chosen, var[5]]}")
+        right2.container(border=True).write(f"{var[7]}: {df.at[chosen, var[7]]}")
+        right2.container(border=True).write(f"{var[9]}: {df.at[chosen, var[9]]}")
 
 def change_date():
     chosen_date = st.session_state.my_date_picker
@@ -165,9 +143,6 @@ if "temp_unit" not in st.session_state:
 if "pressure_unit" not in st.session_state:
     st.session_state.pressure_unit = "Pascal (Pa)"
 
-# if "ml_models" not in st.session_state:
-#     st.session_state.ml_models = "LSTM"
-
 sol = middle.empty()
 ls = middle.empty()
 weather_data = st.empty()
@@ -201,7 +176,7 @@ with st.container():
     chosen_date = st.session_state.my_date_picker
     chosen = chosen_date.strftime("%Y-%m-%d")
 
-    st.subheader('Machine Learning Model Predictions')
+    st.subheader('LSTM Model Predictions')
     pred_left, pred_right = st.columns(2)
     if chosen not in lstmdf.index:
         with pred_left:
@@ -235,39 +210,90 @@ with st.container():
             
             st.metric("Prediction Error", "--")
     else:
-        with pred_left:
-            st.metric(
+        if st.session_state.temp_unit == "Celsius":
+            with pred_left:
+                st.metric(
                             label="Predicted Min Temperature",
-                            value=f"{round(int(lstmdf.at[chosen, 'min_temp']))} C"
-                    )
-            st.metric(
+                            value=f"{round(int(lstmdf.at[chosen, 'min_temp']))} °C"
+                        )
+                st.metric(
                             label="Predicted Max Temperature",
-                            value=f"{round(int(lstmdf.at[chosen, 'max_temp']))} C"
-                    )
-            st.metric(
+                            value=f"{round(int(lstmdf.at[chosen, 'max_temp']))} °C"
+                        )
+                st.metric(
                             label="Predicted Min Ground Temperature",
-                            value=f"{round(int(lstmdf.at[chosen, 'min_gts_temp']))} C"
-                    )
-            st.metric(
+                            value=f"{round(int(lstmdf.at[chosen, 'min_gts_temp']))} °C"
+                        )
+                st.metric(
                             label="Predicted Max Ground Temperature",
-                            value=f"{round(int(lstmdf.at[chosen, 'max_gts_temp']))} C"
-                    )
+                            value=f"{round(int(lstmdf.at[chosen, 'max_gts_temp']))} °C"
+                        )
 
-            
+        elif st.session_state.temp_unit == "Fahrenheit":
+            with pred_left:
+                st.metric(
+                            label="Predicted Min Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'min_temp']) * 1.8 + 32)} °F"
+                        )
+                st.metric(
+                            label="Predicted Max Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'max_temp']) * 1.8 + 32)} °F"
+                        )
+                st.metric(
+                            label="Predicted Min Ground Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'min_gts_temp']) * 1.8 + 32)} °F"
+                        )
+                st.metric(
+                            label="Predicted Max Ground Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'max_gts_temp']) * 1.8 + 32)} °F"
+                        )
+
+        elif st.session_state.temp_unit == "Kelvin":
+            with pred_left:
+                st.metric(
+                            label="Predicted Min Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'min_temp']) + 273.15)} °K"
+                        )
+                st.metric(
+                            label="Predicted Max Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'max_temp']) + 273.15)} °K"
+                        )
+                st.metric(
+                            label="Predicted Min Ground Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'min_gts_temp']) + 273.15)} °K"
+                        )
+                st.metric(
+                            label="Predicted Max Ground Temperature",
+                            value=f"{round(int(lstmdf.at[chosen, 'max_gts_temp']) + 273.15)} °K"
+                        )
+
+        if  st.session_state.pressure_unit == "Pascal (Pa)":
+            with pred_right:
+                st.metric(
+                            label="Predicted Atomospheric Pressure",
+                            value=f"{round(int(lstmdf.at[chosen, 'pressure']))} Pa"
+                        )
+        if  st.session_state.pressure_unit == "Millibar (mbar)":
+            with pred_right:
+                st.metric(
+                            label="Predicted Atomospheric Pressure",
+                            value=f"{round(int(lstmdf.at[chosen, 'pressure'])/100)} mbar"
+                        )
+        if  st.session_state.pressure_unit == "Standard atmosphere (atm)":
+            with pred_right:
+                st.metric(
+                            label="Predicted Atomospheric Pressure",
+                            value=f"{round(int(lstmdf.at[chosen, 'pressure'])/101325, ndigits=5)} atm"
+                        )
+                
         with pred_right:
             st.metric(
-                            label="Predicted Atomospheric Pressure",
-                            value=f"{round(int(lstmdf.at[chosen, 'pressure']))} PA"
-                    )
-            st.metric(
-                            label="Predicted UV Index",
-                            value=f"{lstmdf.at[chosen, 'local_uv_irradiance_index']}"
+                        label="Predicted UV Index",
+                        value=f"{lstmdf.at[chosen, 'local_uv_irradiance_index']}"
                     )
             
             st.metric("Prediction Error", "--")
         
-
-
 #Sidebar features
 with st.sidebar:
     st.radio(
@@ -284,11 +310,3 @@ with st.sidebar:
         on_change=change_date,
         key = "pressure_unit"
     )
-
-# with st.sidebar:
-#     st.radio(
-#         "Machine Learning Models",
-#         ("LSTM", "Random Forest", "XGBoost"),
-#         on_change=change_date,
-#         key = "ml_models"
-#     )
