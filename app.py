@@ -1,10 +1,10 @@
 import streamlit as st
-import json
 from datetime import date
 import pandas as pd
 from pathlib import Path
 
-d = pd.read_json('data/MarsWeatherData.json')
+data_path = Path(__file__).resolve().parent / "data" / "MarsWeatherData.json"
+d = pd.read_json(data_path)
 filtered_df = d["data"]["soles"]
 df = pd.DataFrame(filtered_df)
 df = df.set_index("terrestrial_date")
@@ -15,7 +15,8 @@ df.rename(columns={"min_temp": "Min Temperature", "max_temp": "Max Temperature",
                    "max_gts_temp": "Max Ground Temperature",
                    "sunrise": "Sunrise", "sunset": "Sunset", "season": "Season"}, inplace=True)
 
-lstmdf = pd.read_csv("data/lstm_predictions.csv")
+lstm_preds_path = Path(__file__).resolve().parent / "data" / "lstm_predictions.csv"
+lstmdf = pd.read_csv(lstm_preds_path)
 lstmdf = lstmdf.set_index("terrestrial_date")
 
 most_recent_date = df.index[0]
@@ -33,78 +34,75 @@ def fill_data(chosen=most_recent_date):
         track = 0
         for v in var:
             if track%2 == 0:
-                left2.container(border=True).write(f"{v}: -- ")
+                left2.container(border=True).text(f"{v}: -- ")
             else:
-                right2.container(border=True).write(f"{v}: -- ")
+                right2.container(border=True).text(f"{v}: -- ")
             track += 1
 
     else:
         if st.session_state.temp_unit == "Celsius":
-            left2.container(border=True).write(f"{var[0]}: {df.at[chosen, var[0]]}°C")
-            left2.container(border=True).write(f"{var[2]}: {df.at[chosen, var[2]]}°C")
-            left2.container(border=True).write(f"{var[4]}: {df.at[chosen, var[4]]}°C")
-            left2.container(border=True).write(f"{var[6]}: {df.at[chosen, var[6]]}°C")
+            left2.container(border=True).text(f"{var[0]}: {df.at[chosen, var[0]]}°C")
+            left2.container(border=True).text(f"{var[2]}: {df.at[chosen, var[2]]}°C")
+            left2.container(border=True).text(f"{var[4]}: {df.at[chosen, var[4]]}°C")
+            left2.container(border=True).text(f"{var[6]}: {df.at[chosen, var[6]]}°C")
 
         elif st.session_state.temp_unit == "Fahrenheit":
             if df.at[chosen, var[0]] != "--":
-                left2.container(border=True).write(f"{var[0]}: {round(int(df.at[chosen, var[0]]) * 1.8 + 32)}°F")
+                left2.container(border=True).text(f"{var[0]}: {round(int(df.at[chosen, var[0]]) * 1.8 + 32)}°F")
             else:
-                left2.container(border=True).write(f"{var[0]}: --°F")
+                left2.container(border=True).text(f"{var[0]}: --°F")
             if df.at[chosen, var[2]] != "--":
-                left2.container(border=True).write(f"{var[2]}: {round(int(df.at[chosen, var[2]]) * 1.8 + 32)}°F")
+                left2.container(border=True).text(f"{var[2]}: {round(int(df.at[chosen, var[2]]) * 1.8 + 32)}°F")
             else:
-                left2.container(border=True).write(f"{var[2]}: --°F")
+                left2.container(border=True).text(f"{var[2]}: --°F")
             if df.at[chosen, var[4]] != "--":
-                left2.container(border=True).write(f"{var[4]}: {round(int(df.at[chosen, var[4]]) * 1.8 + 32)}°F")
+                left2.container(border=True).text(f"{var[4]}: {round(int(df.at[chosen, var[4]]) * 1.8 + 32)}°F")
             else:
-                left2.container(border=True).write(f"{var[4]}: --°F")
+                left2.container(border=True).text(f"{var[4]}: --°F")
             if df.at[chosen, var[6]] != "--":
-                left2.container(border=True).write(f"{var[6]}: {round(int(df.at[chosen, var[6]]) * 1.8 + 32)}°F")
+                left2.container(border=True).text(f"{var[6]}: {round(int(df.at[chosen, var[6]]) * 1.8 + 32)}°F")
             else:
-                left2.container(border=True).write(f"{var[6]}: --°F")
+                left2.container(border=True).text(f"{var[6]}: --°F")
 
         elif st.session_state.temp_unit == "Kelvin":
             if df.at[chosen, var[0]] != "--":
-                left2.container(border=True).write(f"{var[0]}: {round(int(df.at[chosen, var[0]]) + 273.15)}°K")
+                left2.container(border=True).text(f"{var[0]}: {round(int(df.at[chosen, var[0]]) + 273.15)}°K")
             else:
-                left2.container(border=True).write(f"{var[0]}: --°K")
+                left2.container(border=True).text(f"{var[0]}: --°K")
             if df.at[chosen, var[2]] != "--":
-                left2.container(border=True).write(f"{var[2]}: {round(int(df.at[chosen, var[2]]) + 273.15)}°K")
+                left2.container(border=True).text(f"{var[2]}: {round(int(df.at[chosen, var[2]]) + 273.15)}°K")
             else:
-                left2.container(border=True).write(f"{var[2]}: --°K")
+                left2.container(border=True).text(f"{var[2]}: --°K")
             if df.at[chosen, var[4]] != "--":
-                left2.container(border=True).write(f"{var[4]}: {round(int(df.at[chosen, var[4]]) + 273.15)}°K")
+                left2.container(border=True).text(f"{var[4]}: {round(int(df.at[chosen, var[4]]) + 273.15)}°K")
             else:
-                left2.container(border=True).write(f"{var[4]}: --°K")
+                left2.container(border=True).text(f"{var[4]}: --°K")
             if df.at[chosen, var[6]] != "--":
-                left2.container(border=True).write(f"{var[6]}: {round(int(df.at[chosen, var[6]]) + 273.15)}°K")
+                left2.container(border=True).text(f"{var[6]}: {round(int(df.at[chosen, var[6]]) + 273.15)}°K")
             else:
-                left2.container(border=True).write(f"{var[6]}: --°K")
+                left2.container(border=True).text(f"{var[6]}: --°K")
         
         #for the pressure
         if df.at[chosen, var[8]] == "--":
-            left2.container(border=True).write(f"{var[8]}: --")
+            left2.container(border=True).text(f"{var[8]}: --")
         elif st.session_state.pressure_unit == "Pascal (Pa)":
-            left2.container(border=True).write(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
+            left2.container(border=True).text(f"{var[8]}: {df.at[chosen, var[8]]} Pa")
         elif  st.session_state.pressure_unit == "Millibar (mbar)":
-            left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
+            left2.container(border=True).text(f"{var[8]}: {round(int(df.at[chosen, var[8]])/100)} mbar")
         elif st.session_state.pressure_unit == "Standard atmosphere (atm)":
-            left2.container(border=True).write(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
+            left2.container(border=True).text(f"{var[8]}: {round(int(df.at[chosen, var[8]])/101325, ndigits=5)} atm")
 
         #data with no unit of measurement options
-        right2.container(border=True).write(f"{var[1]}: {df.at[chosen, var[1]]}")
-        right2.container(border=True).write(f"{var[3]}: {df.at[chosen, var[3]]}")
-        right2.container(border=True).write(f"{var[5]}: {df.at[chosen, var[5]]}")
-        right2.container(border=True).write(f"{var[7]}: {df.at[chosen, var[7]]}")
-        right2.container(border=True).write(f"{var[9]}: {df.at[chosen, var[9]]}")
+        right2.container(border=True).text(f"{var[1]}: {df.at[chosen, var[1]]}")
+        right2.container(border=True).text(f"{var[3]}: {df.at[chosen, var[3]]}")
+        right2.container(border=True).text(f"{var[5]}: {df.at[chosen, var[5]]}")
+        right2.container(border=True).text(f"{var[7]}: {df.at[chosen, var[7]]}")
+        right2.container(border=True).text(f"{var[9]}: {df.at[chosen, var[9]]}")
 
 def change_date():
     chosen_date = st.session_state.my_date_picker
     date_str = chosen_date.strftime("%Y-%m-%d")
     fill_data(date_str)
-
-with open("data/MarsWeatherData.json", "r") as file:
-    data = json.load(file)
 
 #This just centers the title
 # l, m, r = st.columns([1, 4, 1])
@@ -119,12 +117,16 @@ with center:
     st.image(
     
         str(image_path),
-        caption="This self-portrait of NASA's Curiosity Mars rover shows the vehicle on Vera Rubin Ridge, which it's been investigating for the past several months.Directly behind the rover is the start of a clay-rich slope scientists are eager to begin exploring. In the coming week, Curiosity will begin to climb this slope. North is on the left and west is on the right, with Gale Crater's rim on the horizon of both edges.",
+        caption="This self-portrait of NASA's Curiosity Mars rover shows the vehicle on " \
+        "Vera Rubin Ridge, which it's been investigating for the past several months. " \
+        "Directly behind the rover is the start of a clay-rich slope scientists are eager to " \
+        "begin exploring. In the coming week, Curiosity will begin to climb this slope. " \
+        "North is on the left and west is on the right, with Gale Crater's rim on the horizon " \
+        "of both edges.",
         width=500
 )
 
 left, middle, right = st.columns([2, 1, 2])
-#middle.markdown("""###### :orange[Terrestrial Date]""")
 middle.date_input(
     "Terrestrial Date", 
     value=date.fromisoformat(most_recent_date), 
@@ -151,19 +153,27 @@ with sol.container():
     chosen_date = st.session_state.my_date_picker
     date_str = chosen_date.strftime("%Y-%m-%d")
     if date_str not in df.index:
-        sol.container().write(f"SOL: not recorded")
+        sol.container().text(f"SOL: --", 
+                             help="A day on Mars is a sol, which is about 24 hours and 40 minutes. " \
+                             "Here, the sol represents the number of days Curiosity has been on Mars.")
     else:
         s = df.at[date_str, "sol"]
-        sol.container().write(f"SOL: {s}")
-
+        sol.container().text(f"SOL: {s}", 
+                             help="A day on Mars is a sol, which is about 24 hours and 40 minutes. " \
+                             "Here, the sol represents the number of days Curiosity has been on Mars.")
+   
 with ls.container():
     chosen_date = st.session_state.my_date_picker
     date_str = chosen_date.strftime("%Y-%m-%d")
     if date_str not in df.index:
-        ls.container().write(f"LS: --")
+        ls.container().text(f"LS: --",
+                            help="A Martian year lasts about two Earth's year. Solar longitude "
+                            "is an angle that gives the position of Mars on its orbit.")
     else:
         l = df.at[date_str, "ls"]
-        ls.container().write(f"LS: {l}")
+        ls.container().text(f"LS: {l}",
+                            help="A Martian year lasts about two Earth's year. Solar longitude "
+                            "is an angle that gives the position of Mars on its orbit.")
 
 with weather_data.container():
     chosen_date = st.session_state.my_date_picker
@@ -292,7 +302,8 @@ with st.container():
                         value=f"{lstmdf.at[chosen, 'local_uv_irradiance_index']}"
                     )
             
-            st.metric("Prediction Error", "--")
+            st.metric("Overall MAE", "0.04665", 
+                      help="The overall Mean Average Error made by the LSTM model for the testing data predictions.")
         
 #Sidebar features
 with st.sidebar:

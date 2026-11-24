@@ -12,10 +12,13 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import csv
 from datetime import datetime, timedelta
 from collections import deque
+from pathlib import Path
+
+current_path = Path(__file__).parent.absolute()
 
 def create_mars_lstm(show_metrics=True):
     # Load the dataset without attempting to parse dates
-    d = pd.read_json('data/MarsWeatherData.json')
+    d = pd.read_json(str(current_path.parent) + '/data/MarsWeatherData.json')
     filtered_df = d["data"]["soles"]
     df = pd.DataFrame(filtered_df)
 
@@ -93,7 +96,8 @@ def create_mars_lstm(show_metrics=True):
 
     history = model.fit(train_x, train_y, epochs=30, batch_size=16)
 
-    model.save("lstm_model.keras")
+    model.save(str(current_path) + "/lstm_model.keras")
+    
     predictions = model.predict(test_x)
 
     if show_metrics:
@@ -127,9 +131,8 @@ def create_mars_lstm(show_metrics=True):
         predicted_values = scaler.inverse_transform(predictions)
         pred_df = pd.DataFrame(predicted_values, index=df.index[train_size + sequence_length:], columns=variables)
         pred_df['local_uv_irradiance_index'] = pred_df["local_uv_irradiance_index"].clip(lower=0, upper=4).round(0).astype(int).map(uv_str)
-        pred_df.to_csv("data/lstm_predictions.csv", index_label="terrestrial_date")
+        pred_df.to_csv(str(current_path.parent) + "/data/lstm_predictions.csv", index_label="terrestrial_date")
 
-        #Still need to test this
         for i in range(len(variables)):
             # Plotting predicted and actual temperatures
             plt.figure(figsize=(10, 6))
@@ -148,7 +151,7 @@ def create_mars_lstm(show_metrics=True):
 
 def lstm_next_day_pred():
     # down below loads the lstm model to predict the next day based on the last/most recent 50 days
-    d = pd.read_json('data/MarsWeatherData.json')
+    d = pd.read_json(str(current_path.parent) + '/data/MarsWeatherData.json')
     filtered_df = d["data"]["soles"]
     df = pd.DataFrame(filtered_df)
 
@@ -181,7 +184,7 @@ def lstm_next_day_pred():
     scaled_data = scaler.fit_transform(df)
 
 
-    loaded_model = saving.load_model("lstm_model.keras")
+    loaded_model = saving.load_model(str(current_path) + "/lstm_model.keras")
 
     last_window_3d = np.expand_dims(scaled_data, axis=0)
     predicted_scaled = loaded_model.predict(last_window_3d)
@@ -208,7 +211,7 @@ def lstm_next_day_pred():
     #As it is only predicting one day ahead, it takes the last day and converts it into datetime
     #so it can be easily converted to the next day. This is then appended to the csv file
     try:
-        with open("data/lstm_predictions.csv", mode="r", newline="", encoding="utf-8") as file:
+        with open(str(current_path.parent) + "/data/lstm_predictions.csv", mode="r", newline="", encoding="utf-8") as file:
             reader = csv.reader(file)
             last_row = deque(reader, maxlen=1)[0]
         index_list = df.index.to_list()
@@ -216,7 +219,7 @@ def lstm_next_day_pred():
         next_day = date + timedelta(days=1)
         if last_row[0] != next_day.strftime("%Y-%m-%d"):
             df = pd.DataFrame([future_pred], index=[next_day.strftime("%Y-%m-%d")])
-            df.to_csv("data/lstm_predictions.csv", mode="a", header=False)
+            df.to_csv(str(current_path.parent) + "/data/lstm_predictions.csv", mode="a", header=False)
     except:
         print("file missing")
 

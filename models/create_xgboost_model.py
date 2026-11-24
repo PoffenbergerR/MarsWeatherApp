@@ -4,16 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import xgboost as xgb
+from pathlib import Path
 
-def create_mars_xgboost(show_metrics=False):
+current_path = Path(__file__).parent.absolute()
+
+def create_mars_xgboost(show_metrics=True):
     # Load the dataset without attempting to parse dates
-    d = pd.read_json('MarsWeatherData.json')
+    d = pd.read_json(str(current_path.parent) + '/data/MarsWeatherData.json')
     filtered_df = d["data"]["soles"]
     df = pd.DataFrame(filtered_df)
 
     df = df.set_index("terrestrial_date")
 
-    variables = ["min_temp", "max_temp", "pressure", "local_uv_irradiance_index", "min_gts_temp", "max_gts_temp", "ls"]
+    variables = ["min_temp", "max_temp", "pressure", "local_uv_irradiance_index", 
+                "min_gts_temp", "max_gts_temp", "ls"]
+    
     df = df[variables]
     uv_numeric = {
         "Very_Low": 0,
@@ -53,7 +58,6 @@ def create_mars_xgboost(show_metrics=False):
 
     df["lag_ls"] = df["ls"].shift(1)
     df = df.dropna()
-    # df = df.iloc[::-1]
 
     lag_features = ['lag_min_temp', 'lag_max_temp', 'lag_pressure', 
                        'lag_uv_index', 'lag_min_gts_temp', 'lag_max_gts_temp',
@@ -72,7 +76,6 @@ def create_mars_xgboost(show_metrics=False):
     # Create regression matrices
     dtrain_reg = xgb.DMatrix(X_train, y_train)
     dtest_reg = xgb.DMatrix(X_test, y_test)
-    print(dtest_reg)
 
     params = {"objective": "reg:squarederror", 
             "tree_method": "hist",
@@ -111,9 +114,6 @@ def create_mars_xgboost(show_metrics=False):
             print(f"{variables[i]} Root Mean Squared Error (RMSE):", rmse)
         
         # Plotting predicted and actual temperatures
-        print("preds",preds[-100:])
-        print("100 y_test",y_test[-100:])
-
         for i in range(len(variables) - 1):
             plt.figure(figsize=(10, 6))
             plt.plot(y.index[-100:], y_test.iloc[-100:, i], label='Actual')
@@ -134,15 +134,17 @@ def create_mars_xgboost(show_metrics=False):
     d_next_day = xgb.DMatrix(X_test[-1:])
     future_preds = model.predict(d_next_day)
     print(future_preds)
-    model.save_model("xgboost_model.json")
+    model.save_model(str(current_path) + "/xgboost_model.json")
 
 def xgboost_next_day_pred():
-    d = pd.read_json('MarsWeatherData.json')
+    d = pd.read_json(str(current_path.parent) + '/data/MarsWeatherData.json')
     filtered_df = d["data"]["soles"]
     df = pd.DataFrame(filtered_df)
 
     df = df.set_index("terrestrial_date")
-    variables = ["min_temp", "max_temp", "pressure", "local_uv_irradiance_index", "min_gts_temp", "max_gts_temp", "ls"]
+    variables = ["min_temp", "max_temp", "pressure", "local_uv_irradiance_index", 
+                 "min_gts_temp", "max_gts_temp", "ls"]
+    
     df = df[variables]
     df = df.rename(columns={"min_temp": "lag_min_temp", "max_temp": "lag_max_temp", "pressure": "lag_pressure",
                        "local_uv_irradiance_index": "lag_uv_index", "min_gts_temp": "lag_min_gts_temp",
@@ -169,11 +171,12 @@ def xgboost_next_day_pred():
         df[n] = pd.to_numeric(df[n])
 
     loaded_model = xgb.Booster()
-    loaded_model.load_model("xgboost_model.json")
+    loaded_model.load_model(str(current_path) + "/xgboost_model.json")
     d_next_day = xgb.DMatrix(df)
     future_pred = loaded_model.predict(d_next_day)
     return future_pred
 
 if __name__ == "__main__":
+    create_mars_xgboost()
     furutre_pred = xgboost_next_day_pred()
     print(furutre_pred)
